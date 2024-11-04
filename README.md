@@ -1,2 +1,3 @@
 # javatasksOtusM
-For Otus homeworks 
+Студент:
+Adil Askar (Адиль Аскар)
