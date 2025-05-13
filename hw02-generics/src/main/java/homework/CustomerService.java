@@ -4,42 +4,30 @@ import java.util.*;
 
 public class CustomerService {
 
-    // todo: 3. надо реализовать методы этого класса
-    // важно подобрать подходящую Map-у, посмотрите на редко используемые методы, они тут полезны
-    private final Map<Customer, String> map = new HashMap<>();
+    private final NavigableMap<Long, Map.Entry<Customer, String>> sorted = new TreeMap<>();
 
-    public Map.Entry<Customer, String> getSmallest() {
-        // Возможно, чтобы реализовать этот метод, потребуется посмотреть как Map.Entry сделан в jdk
-        return map.entrySet().stream()
-                .min(Comparator.comparingInt(e -> (int) e.getKey().getScores()))
-                .map(this::cloneEntry)
-                .orElseThrow(() -> new NoSuchElementException("No customers in service"));
+    public void add(Customer customer, String data) {
+        Customer customer1 = new Customer(customer.getId(), customer.getName(), customer.getScores());
+        sorted.put(customer.getScores(), new AbstractMap.SimpleEntry<>(customer1, data));
     }
 
-    public Map.Entry<Customer, String> getNext(Customer customer) {
-        int score = (int) customer.getScores();
-        return map.entrySet().stream()
-                .filter(e -> e.getKey().getScores() > score)
-                .min(Comparator.comparingInt(e -> (int) e.getKey().getScores()))
-                .map(this::cloneEntry)
-                //                .map(e -> {
-                //                    Customer orig = e.getKey();
-                //                    Customer clone = new Customer(
-                //                            orig.getId(),
-                //                            orig.getName(),
-                //                            originalScores.get(orig)
-                //                      );
-                //                      return new AbstractMap.SimpleEntry<>(clone, e.getValue());
+    public Map.Entry<Customer, String> getSmallest() {
+        return Optional.ofNullable(sorted.firstEntry())
+                .map(Map.Entry::getValue)
+                .map(this::makeCopy)
                 .orElse(null);
     }
 
-    private Map.Entry<Customer, String> cloneEntry(Map.Entry<Customer, String> e) {
-        Customer orig = e.getKey();
-        Customer copy = new Customer(orig.getId(), orig.getName(), orig.getScores());
-        return new AbstractMap.SimpleEntry<>(copy, e.getValue());
+    public Map.Entry<Customer, String> getNext(Customer key) {
+        return Optional.ofNullable(sorted.higherEntry(key.getScores()))
+                .map(Map.Entry::getValue)
+                .map(this::makeCopy)
+                .orElse(null);
     }
 
-    public void add(Customer customer, String data) {
-        map.put(customer, data);
+    private Map.Entry<Customer, String> makeCopy(Map.Entry<Customer, String> e) {
+        Customer stored = e.getKey();
+        Customer copy = new Customer(stored.getId(), stored.getName(), stored.getScores());
+        return new AbstractMap.SimpleEntry<>(copy, e.getValue());
     }
 }

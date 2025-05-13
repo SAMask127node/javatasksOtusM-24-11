@@ -45,10 +45,9 @@ public class Customer {
 
         Customer customer = (Customer) o;
 
-        if (id != customer.id) return false;
+        return id == customer.id;
         //        if (scores != customer.scores) return false;
         //        return Objects.equals(name, customer.name);
-        return true;
     }
 
     @Override
